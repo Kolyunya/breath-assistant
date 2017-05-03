@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Breath Assistant</Name>
+    <Version>1.0.0</Version>
+    <Title>Breath Assistant Installer</Title>
+    <Publisher>Kolyunya</Publisher>
+    <StartMenuDir>Breath Assistant</StartMenuDir>
+    <TargetDir>@HomeDir@/software/breath-assistant</TargetDir>
+</Installer>
+
