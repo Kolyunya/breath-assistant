@@ -4,11 +4,11 @@
 #include <QtCore/QRect>
 #include <QtCore/QSize>
 #include <QtGui/QBrush>
-#include <QtGui/QGradient>
 #include <QtGui/QLinearGradient>
 #include <QtGui/QPaintEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QPen>
+#include <QtGui/QRadialGradient>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 
@@ -31,8 +31,11 @@ void OverlayWindow::paintEvent(QPaintEvent* paintEventPtr)
     painter.setPen(QPen(Qt::NoPen));
 
     for (int position = 1; position <= 4; position++) {
-        this->configureOverlayBrush(painter, position);
-        painter.drawRect(this->getOverlayRectangle(position));
+        this->configureBorderBrush(painter, position);
+        painter.drawRect(this->getOverlayBorder(position));
+
+        this->configureCornerBrush(painter, position);
+        painter.drawRect(this->getOverlayCorner(position));
     }
 
     paintEventPtr->accept();
@@ -71,7 +74,7 @@ void OverlayWindow::initializeOpacityAnimation()
     );
 }
 
-void OverlayWindow::configureOverlayBrush(QPainter& painter, int position)
+void OverlayWindow::configureBorderBrush(QPainter& painter, int position)
 {
     QPoint gradientStartPoint;
     QPoint gradientStopPoint;
@@ -107,33 +110,98 @@ void OverlayWindow::configureOverlayBrush(QPainter& painter, int position)
     painter.setBrush(brush);
 }
 
-QRect OverlayWindow::getOverlayRectangle(int position) const
+void OverlayWindow::configureCornerBrush(QPainter &painter, int position)
+{
+    QPoint gradientCenter;
+
+    switch (position) {
+        case 1:
+            gradientCenter = QPoint(this->width() - this->overlayThickness, this->overlayThickness);
+            break;
+        case 2:
+            gradientCenter = QPoint(this->width() - this->overlayThickness, this->height() - this->overlayThickness);
+            break;
+        case 3:
+            gradientCenter = QPoint(this->overlayThickness, this->height() - this->overlayThickness);
+            break;
+        case 4:
+            gradientCenter = QPoint(this->overlayThickness, this->overlayThickness);
+            break;
+    }
+
+    QRadialGradient gradient(gradientCenter, this->overlayThickness);
+
+    QColor transparentColor(this->overlayColor);
+    transparentColor.setAlpha(0);
+
+    gradient.setColorAt(0, transparentColor);
+    gradient.setColorAt(1, this->overlayColor);
+
+    QBrush brush(gradient);
+    painter.setBrush(brush);
+}
+
+QRect OverlayWindow::getOverlayBorder(int position) const
 {
     QRect rectangle;
 
     switch (position) {
         case 1:
             rectangle = QRect(
-                QPoint(0, 0),
-                QSize(this->width(), this->overlayThickness)
+                QPoint(this->overlayThickness, 0),
+                QSize(this->width() - this->overlayThickness * 2, this->overlayThickness)
             );
             break;
         case 2:
             rectangle = QRect(
+                QPoint(this->width() - this->overlayThickness, this->overlayThickness),
+                QSize(this->overlayThickness, this->height() - this->overlayThickness * 2)
+            );
+            break;
+        case 3:
+            rectangle = QRect(
+                QPoint(this->overlayThickness, this->height() - this->overlayThickness),
+                QSize(this->width() - this->overlayThickness * 2, this->overlayThickness)
+            );
+            break;
+        case 4:
+            rectangle = QRect(
+                QPoint(0, this->overlayThickness),
+                QSize(this->overlayThickness, this->height() - this->overlayThickness * 2)
+            );
+            break;
+    }
+
+    return rectangle;
+}
+
+QRect OverlayWindow::getOverlayCorner(int position) const
+{
+    QRect rectangle;
+
+    switch (position) {
+        case 1:
+            rectangle = QRect(
                 QPoint(this->width() - this->overlayThickness, 0),
-                QSize(this->overlayThickness, this->height())
+                QSize(this->overlayThickness, this->overlayThickness)
+            );
+            break;
+        case 2:
+            rectangle = QRect(
+                QPoint(this->width() - this->overlayThickness, this->height() - this->overlayThickness),
+                QSize(this->overlayThickness, this->overlayThickness)
             );
             break;
         case 3:
             rectangle = QRect(
                 QPoint(0, this->height() - this->overlayThickness),
-                QSize(this->width(), this->overlayThickness)
+                QSize(this->overlayThickness, this->overlayThickness)
             );
             break;
         case 4:
             rectangle = QRect(
                 QPoint(0, 0),
-                QSize(this->overlayThickness, this->height())
+                QSize(this->overlayThickness, this->overlayThickness)
             );
             break;
     }

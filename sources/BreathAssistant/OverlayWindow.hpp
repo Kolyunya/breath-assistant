@@ -24,8 +24,10 @@ class OverlayWindow : public QWidget
         void configureWindowProperties();
         void initializeOpacityEffect();
         void initializeOpacityAnimation();
-        void configureOverlayBrush(QPainter& painter, int position);
-        QRect getOverlayRectangle(int position) const;
+        void configureBorderBrush(QPainter& painter, int position);
+        void configureCornerBrush(QPainter& painter, int position);
+        QRect getOverlayBorder(int position) const;
+        QRect getOverlayCorner(int position) const;
         QGraphicsOpacityEffect opacityEffect;
         QPropertyAnimation opacityAnimation;
         bool opacityAnimationEnabled;
