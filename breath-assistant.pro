@@ -7,6 +7,11 @@ QT += \
     gui \
     widgets \
 
+CONFIG += \
+    c++11 \
+    c++14 \
+    warn_on \
+
 INCLUDEPATH += \
     sources
 
