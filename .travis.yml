@@ -1,0 +1,9 @@
+language: cpp
+dist: trusty
+addons:
+    apt:
+        packages:
+            - qt5-default
+script:
+    - qmake
+    - make
