@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget* parentPtr) :
     this->configureWindowPosition();
     this->configureTrayIcon();
     this->initializeOverlayWindows();
+    this->loadUserPreferences();
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +40,27 @@ MainWindow::~MainWindow()
 void MainWindow::configureUserInterface()
 {
     this->uiPtr->setupUi(this);
+
+    QObject::connect(
+        this->uiPtr->breathRateSlider,
+        &QSlider::valueChanged,
+        this,
+        &MainWindow::persistBreathRate
+    );
+
+    QObject::connect(
+        this->uiPtr->overlayThicknessSlider,
+        &QSlider::valueChanged,
+        this,
+        &MainWindow::persistOverlayThickness
+    );
+
+    QObject::connect(
+        this->uiPtr->overlayOpacitySlider,
+        &QSlider::valueChanged,
+        this,
+        &MainWindow::persistOverlayOpacity
+    );
 
     // todo: refactor to new signal/slot syntax
     QObject::connect(
@@ -97,6 +119,74 @@ void MainWindow::initializeOverlayWindows()
 
     QAbstractButton* overlayColorButton = this->uiPtr->overlayColorButtonGroup->checkedButton();
     this->setOverlayColor(overlayColorButton);
+}
+
+void MainWindow::loadUserPreferences()
+{
+    this->loadBreathRate();
+    this->loadOverlayThickness();
+    this->loadOverlayOpacity();
+    this->loadOverlayColor();
+}
+
+void MainWindow::loadBreathRate()
+{
+    QVariant breathRateVariant = this->settings.value("breath-rate");
+    if (breathRateVariant.isNull() == false) {
+        int breathRate = breathRateVariant.toInt();
+        this->uiPtr->breathRateSlider->valueChanged(breathRate);
+
+        for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
+            overlayWindowPtr->setBreathRate(breathRate);
+        }
+    }
+}
+
+void MainWindow::loadOverlayThickness()
+{
+    QVariant overlayThicknessVariant = this->settings.value("overlay-thickness");
+    if (overlayThicknessVariant.isNull() == false) {
+        int overlayThickness = overlayThicknessVariant.toInt();
+        this->uiPtr->overlayThicknessSlider->valueChanged(overlayThickness);
+
+        for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
+            overlayWindowPtr->setOverlayThickness(overlayThickness);
+        }
+    }
+}
+
+void MainWindow::loadOverlayOpacity()
+{
+    QVariant overlayOpacityVarian = this->settings.value("overlay-opacity");
+    if (overlayOpacityVarian.isNull() == false) {
+        int overlayOpacity = overlayOpacityVarian.toInt();
+        this->uiPtr->overlayOpacitySlider->valueChanged(overlayOpacity);
+
+        for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
+            overlayWindowPtr->setOverlayOpacity(overlayOpacity);
+        }
+    }
+}
+
+void MainWindow::loadOverlayColor()
+{
+    QVariant overlayColorVarian = this->settings.value("overlay-color");
+    if (overlayColorVarian.isNull() == false) {
+        QColor overlayColor = overlayColorVarian.value<QColor>();
+
+        for (QAbstractButton* overlayColorButtonPtr: this->uiPtr->overlayColorButtonGroup->buttons()) {
+            QColor overlayColorButtonColor = overlayColorButtonPtr->palette().background().color();
+
+            if (overlayColorButtonColor == overlayColor) {
+                overlayColorButtonPtr->setChecked(true);
+                break;
+            }
+        }
+
+        for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
+            overlayWindowPtr->setOverlayColor(overlayColor);
+        }
+    }
 }
 
 void MainWindow::initializeOverlayWindow(QScreen* screenPtr)
@@ -161,4 +251,34 @@ void MainWindow::setOverlayColor(QAbstractButton* button)
     for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
         overlayWindowPtr->setOverlayColor(color);
     }
+
+    this->persistOverlayColor(color);
+}
+
+void MainWindow::persistBreathRate(int breathRate)
+{
+    this->settings.setValue("breath-rate", breathRate);
+}
+
+void MainWindow::persistOverlayThickness(int overlayThickness)
+{
+    this->settings.setValue("overlay-thickness", overlayThickness);
+}
+
+void MainWindow::persistOverlayOpacity(int overlayOpacity)
+{
+    this->settings.setValue("overlay-opacity", overlayOpacity);
+}
+
+void MainWindow::persistOverlayColor(QColor overlayColor)
+{
+    // A very dirty hack to ignore the first clicked signal which is fired by the
+    // button group for some reason right after application startup.
+    static bool isFirstSignal = true;
+    if (isFirstSignal == true) {
+        isFirstSignal = false;
+        return;
+    }
+
+    this->settings.setValue("overlay-color", overlayColor);
 }

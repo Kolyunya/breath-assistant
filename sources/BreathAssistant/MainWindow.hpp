@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_HPP
 
 #include <QtCore/QList>
+#include <QtCore/QSettings>
 #include <QtWidgets/QMainWindow>
 
 class OverlayWindow;
@@ -27,6 +28,12 @@ class MainWindow : public QMainWindow
         void configureTrayIcon();
         void initializeOverlayWindows();
         void initializeOverlayWindow(QScreen* screenPtr);
+        void loadUserPreferences();
+        void loadBreathRate();
+        void loadOverlayThickness();
+        void loadOverlayOpacity();
+        void loadOverlayColor();
+        QSettings settings;
         Ui::MainWindow* uiPtr;
         QSystemTrayIcon* trayIconPtr;
         QList<OverlayWindow*> overlayWindows;
@@ -36,6 +43,10 @@ class MainWindow : public QMainWindow
         void showFromTray();
         void showOverlay(bool visible);
         void setOverlayColor(QAbstractButton* buttonPtr);
+        void persistBreathRate(int breathRate);
+        void persistOverlayThickness(int overlayThickness);
+        void persistOverlayOpacity(int overlayOpacity);
+        void persistOverlayColor(QColor overlayColor);
 };
 
 #endif // MAIN_WINDOW_HPP
