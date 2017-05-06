@@ -1,14 +1,14 @@
 #ifndef OVERLAY_WINDOW_HPP
 #define OVERLAY_WINDOW_HPP
 
+#include <QtCore/QList>
 #include <QtCore/QPropertyAnimation>
-#include <QtCore/QRect>
+#include <QtCore/QSize>
 #include <QtGui/QColor>
-#include <QtGui/QPainter>
 #include <QtWidgets/QGraphicsOpacityEffect>
 #include <QtWidgets/QWidget>
 
-class QPaintEvent;
+class OverlayComponent;
 
 class OverlayWindow : public QWidget
 {
@@ -17,26 +17,21 @@ class OverlayWindow : public QWidget
     public:
         explicit OverlayWindow(QWidget* parentPtr = Q_NULLPTR);
 
-    protected:
-        void paintEvent(QPaintEvent* paintEventPtr);
-
     private:
         void configureWindowProperties();
+        void initializeOverlayBorders();
+        void initializeOverlayCorners();
         void initializeOpacityEffect();
         void initializeOpacityAnimation();
-        void configureBorderBrush(QPainter& painter, int position);
-        void configureCornerBrush(QPainter& painter, int position);
-        QRect getOverlayBorder(int position) const;
-        QRect getOverlayCorner(int position) const;
+        QList<OverlayComponent*> components;
         QGraphicsOpacityEffect opacityEffect;
         QPropertyAnimation opacityAnimation;
         bool opacityAnimationEnabled;
         int opacityAnimationDuration;
         qreal overlayOpacity;
-        int overlayThickness;
-        QColor overlayColor;
 
     public slots:
+        void setScreenSize(QSize screenSize);
         void setBreathRate(int breathRate);
         void setOverlayOpacity(int opacity);
         void setOverlayThickness(int thickness);
