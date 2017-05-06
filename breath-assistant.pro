@@ -17,11 +17,17 @@ INCLUDEPATH += \
 
 HEADERS += \
     sources/BreathAssistant/MainWindow.hpp \
+    sources/BreathAssistant/OverlayBorder.hpp \
+    sources/BreathAssistant/OverlayCorner.hpp \
+    sources/BreathAssistant/OverlayComponent.hpp \
     sources/BreathAssistant/OverlayWindow.hpp \
 
 SOURCES += \
     sources/main.cpp\
     sources/BreathAssistant/MainWindow.cpp \
+    sources/BreathAssistant/OverlayBorder.cpp \
+    sources/BreathAssistant/OverlayCorner.cpp \
+    sources/BreathAssistant/OverlayComponent.cpp \
     sources/BreathAssistant/OverlayWindow.cpp \
 
 FORMS += \

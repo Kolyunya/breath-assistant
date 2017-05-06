@@ -1,7 +1,6 @@
 #ifndef MAIN_WINDOW_HPP
 #define MAIN_WINDOW_HPP
 
-#include <QtCore>
 #include <QtCore/QList>
 #include <QtWidgets/QMainWindow>
 

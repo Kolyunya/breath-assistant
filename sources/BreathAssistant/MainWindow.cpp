@@ -127,9 +127,9 @@ void MainWindow::initializeOverlayWindow(QScreen* screenPtr)
     overlayWindowPtr->setBreathRate(this->uiPtr->breathRateSlider->value());
     overlayWindowPtr->setOverlayOpacity(this->uiPtr->overlayOpacitySlider->value());
     overlayWindowPtr->setOverlayThickness(this->uiPtr->overlayThicknessSlider->value());
+    overlayWindowPtr->setScreenSize(screenPtr->size());
 
     overlayWindowPtr->move(screenPtr->geometry().topLeft());
-    overlayWindowPtr->setFixedSize(screenPtr->size());
     overlayWindowPtr->show();
 
     this->overlayWindows.append(overlayWindowPtr);
