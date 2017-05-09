@@ -100,7 +100,7 @@ void OverlayWindow::setOverlayThickness(int thickness)
     }
 }
 
-void OverlayWindow::setOverlayColor(QColor& color)
+void OverlayWindow::setOverlayColor(const QColor& color)
 {
     for (OverlayComponent* overlayComponent: this->components) {
         overlayComponent->setOverlayColor(color);

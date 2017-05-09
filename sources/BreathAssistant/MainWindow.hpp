@@ -7,6 +7,7 @@
 
 class OverlayWindow;
 class QAbstractButton;
+class QColorDialog;
 class QScreen;
 class QSystemTrayIcon;
 
@@ -36,13 +37,16 @@ class MainWindow : public QMainWindow
         QSettings settings;
         Ui::MainWindow* uiPtr;
         QSystemTrayIcon* trayIconPtr;
+        QColorDialog* overlayColorWindowPtr;
         QList<OverlayWindow*> overlayWindows;
 
     private slots:
         void hideToTray();
         void showFromTray();
         void showOverlay(bool visible);
-        void setOverlayColor(QAbstractButton* buttonPtr);
+        void showOverlayColorWindow();
+        void setOverlayColor(const QColor& color);
+        void updateOverlayColorButton(const QColor& color);
         void persistBreathRate(int breathRate);
         void persistOverlayThickness(int overlayThickness);
         void persistOverlayOpacity(int overlayOpacity);

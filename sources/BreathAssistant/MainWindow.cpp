@@ -5,11 +5,13 @@
 #include <QtGui/QColor>
 #include <QtGui/QCursor>
 #include <QtGui/QIcon>
+#include <QtGui/QPalette>
 #include <QtGui/QScreen>
 #include <QtGui/QWindow>
 #include <QtWidgets/QAbstractButton>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QColorDialog>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSystemTrayIcon>
@@ -18,7 +20,8 @@
 MainWindow::MainWindow(QWidget* parentPtr) :
     QMainWindow(parentPtr),
     uiPtr(new Ui::MainWindow()),
-    trayIconPtr(new QSystemTrayIcon(this))
+    trayIconPtr(new QSystemTrayIcon(this)),
+    overlayColorWindowPtr(Q_NULLPTR)
 {
     this->configureUserInterface();
     this->configureWindowPosition();
@@ -29,11 +32,6 @@ MainWindow::MainWindow(QWidget* parentPtr) :
 
 MainWindow::~MainWindow()
 {
-    for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
-        delete overlayWindowPtr;
-    }
-
-    delete this->trayIconPtr;
     delete this->uiPtr;
 }
 
@@ -62,12 +60,11 @@ void MainWindow::configureUserInterface()
         &MainWindow::persistOverlayOpacity
     );
 
-    // todo: refactor to new signal/slot syntax
     QObject::connect(
-        this->uiPtr->overlayColorButtonGroup,
-        SIGNAL(buttonClicked(QAbstractButton*)),
+        this->uiPtr->overlayColorButton,
+        &QAbstractButton::clicked,
         this,
-        SLOT(setOverlayColor(QAbstractButton*))
+        &MainWindow::showOverlayColorWindow
     );
 
     QObject::connect(
@@ -116,9 +113,6 @@ void MainWindow::initializeOverlayWindows()
     for (QScreen* screenPtr: screens) {
         this->initializeOverlayWindow(screenPtr);
     }
-
-    QAbstractButton* overlayColorButton = this->uiPtr->overlayColorButtonGroup->checkedButton();
-    this->setOverlayColor(overlayColorButton);
 }
 
 void MainWindow::loadUserPreferences()
@@ -170,23 +164,13 @@ void MainWindow::loadOverlayOpacity()
 
 void MainWindow::loadOverlayColor()
 {
-    QVariant overlayColorVarian = this->settings.value("overlay-color");
-    if (overlayColorVarian.isNull() == false) {
-        QColor overlayColor = overlayColorVarian.value<QColor>();
-
-        for (QAbstractButton* overlayColorButtonPtr: this->uiPtr->overlayColorButtonGroup->buttons()) {
-            QColor overlayColorButtonColor = overlayColorButtonPtr->palette().background().color();
-
-            if (overlayColorButtonColor == overlayColor) {
-                overlayColorButtonPtr->setChecked(true);
-                break;
-            }
-        }
-
-        for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
-            overlayWindowPtr->setOverlayColor(overlayColor);
-        }
+    QVariant overlayColorVariant = this->settings.value("overlay-color");
+    QColor overlayColor = Qt::white;
+    if (overlayColorVariant.isNull() == false) {
+        overlayColor = overlayColorVariant.value<QColor>();
     }
+
+    this->setOverlayColor(overlayColor);
 }
 
 void MainWindow::initializeOverlayWindow(QScreen* screenPtr)
@@ -244,15 +228,37 @@ void MainWindow::showOverlay(bool visible)
     }
 }
 
-void MainWindow::setOverlayColor(QAbstractButton* button)
+void MainWindow::showOverlayColorWindow()
 {
-    QColor color = button->palette().background().color();
+    this->overlayColorWindowPtr = new QColorDialog(this);
 
+    QObject::connect(
+        this->overlayColorWindowPtr,
+        &QColorDialog::colorSelected,
+        this,
+        &MainWindow::setOverlayColor
+    );
+
+    this->overlayColorWindowPtr->show();
+}
+
+void MainWindow::setOverlayColor(const QColor& color)
+{
     for (OverlayWindow* overlayWindowPtr: this->overlayWindows) {
         overlayWindowPtr->setOverlayColor(color);
     }
 
+    this->updateOverlayColorButton(color);
+
     this->persistOverlayColor(color);
+}
+
+void MainWindow::updateOverlayColorButton(const QColor& color)
+{
+    QAbstractButton* overlayColorButton = this->uiPtr->overlayColorButton;
+    QPalette overlayColorButtonPalette = overlayColorButton->palette();
+    overlayColorButtonPalette.setColor(QPalette::Button, color);
+    overlayColorButton->setPalette(overlayColorButtonPalette);
 }
 
 void MainWindow::persistBreathRate(int breathRate)

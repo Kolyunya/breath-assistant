@@ -35,7 +35,7 @@ class OverlayWindow : public QWidget
         void setBreathRate(int breathRate);
         void setOverlayOpacity(int opacity);
         void setOverlayThickness(int thickness);
-        void setOverlayColor(QColor& color);
+        void setOverlayColor(const QColor& color);
         void toggleOpacityAnimation(bool enabled);
 
     private slots:
