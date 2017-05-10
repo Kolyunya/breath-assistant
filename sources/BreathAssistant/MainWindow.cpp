@@ -230,7 +230,9 @@ void MainWindow::showOverlay(bool visible)
 
 void MainWindow::showOverlayColorWindow()
 {
-    this->overlayColorWindowPtr = new QColorDialog(this);
+    QAbstractButton* overlayColorButton = this->uiPtr->overlayColorButton;
+    QColor overlayColor = overlayColorButton->palette().color(QPalette::Button);
+    this->overlayColorWindowPtr = new QColorDialog(overlayColor, this);
 
     QObject::connect(
         this->overlayColorWindowPtr,
